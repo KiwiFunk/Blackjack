@@ -76,7 +76,7 @@ void Betting()
     {
         validEnty = false;
         Console.WriteLine($"Current Player: {players[i]}");
-        Console.WriteLine($"You have ${bank[i, 0]},how much do you want to wager?");
+        Console.WriteLine($"You have ${bank[i, 0]:N2},how much do you want to wager?");
         do
         {
             returnResult = Console.ReadLine();
@@ -84,11 +84,11 @@ void Betting()
             {
                 if (currentWager <= bank[i, 0])
                 {
-                    Console.WriteLine($"{players[i]} wagered ${currentWager}! Good Luck!");
+                    Console.WriteLine($"{players[i]} wagered ${currentWager:N2}! Good Luck!");
                     bank[i, 1] = currentWager;
                     validEnty = true;
                 }
-                else Console.WriteLine($"Your bank balance is only {bank[i, 0]}, please wager an amount you can afford!");
+                else Console.WriteLine($"Your bank balance is only {bank[i, 0]:N2}, please wager an amount you can afford!");
             }
             else
             {
