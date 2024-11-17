@@ -1,5 +1,5 @@
 ﻿
-//create method for checking win conditions. this needs ot be performed every time a hand is udated.
+//create method for checking win conditions. this needs to be performed every time a hand is udated.
 
 
 // Create a 2D array to contain cards [x,y] x is the suit, y is the card
@@ -11,10 +11,10 @@ int totalCardsRemaining = 52;
 Random cardSelect = new Random();
 string? returnResult;
 
-string[] players = { };                             //Array to store players
-int[,] playersHand;                               //2D array to store current players hands. row= player, column = their cards init using players[].Length to decide x [x,]
+string[] players = { };                          //Array to store players
+int[,] playerHand;                               //2D array to store current players hands. row= player, column = their cards init using players[].Length to decide x [x,]
 int[] dealerHand;
-double[,] bank = new double[0,0];                   //Using a 2D array to store money. Each row(player) has 2 columns, Index 0 holds bank balance, 1 Holds the current bet amount.
+double[,] bank = new double[0,0];                //Using a 2D array to store money. Each row(player) has 2 columns, Index 0 holds bank balance, 1 Holds the current bet amount.
 int round = 0;
 
 bool gameStart = false;
@@ -25,26 +25,37 @@ string playerNames = "";
 Console.WriteLine("Weclome to BlackJack!");
 InitializePlayers();
 Betting();
+AssignCards();
 
-/*
-foreach (string player in players)
+
+void AssignCards()
 {
-    Console.WriteLine($"{player}");
-    //call the dealcards option for each player and populate the playersHand[,] array.
+    //Use as temp card values to replace main
+    if (round == 0)
+    {
+        dealerHand = new int[2];
+        dealerHand[0] = DrawCard(cardDeck);
+        dealerHand[1] = DrawCard(cardDeck);
+        Console.WriteLine($"The dealer draws a {dealerHand[0]} and a face down card!");
+
+        playerHand = new int[players.Length, 2];
+        for (int i = 0; i < players.Length; i++)
+        {
+            playerHand[i, 0] = DrawCard(cardDeck);
+            playerHand[i, 1] = DrawCard(cardDeck);
+            Console.WriteLine($"{players[i]} drew a {playerHand[i, 0]} and {playerHand[i, 1]} for a total of {(playerHand[i, 0] + playerHand[i, 1])}!");
+        }
+
+    }
 }
-*/
-
-
-void AssignCards(string switchCase)
-{
+    //currentPlayerHand
+    //currentDealerHand
+    /*
     switch(switchCase)
     {
         case "FirstRound":
-        for (int i = 0; i < players.Length; i++)
-        {
-            //create new 
-
-        }
+        DrawCard(cardDeck);
+        
         
         
         //If the first round is called, we need to give everyone TWO cards, and then make sure that one of the dealers is hidden (The dealer only reveals the hidden card after the players all fold.)
@@ -60,7 +71,7 @@ void AssignCards(string switchCase)
     }
 }
 
-
+*/
 
 
 
@@ -108,11 +119,11 @@ void Betting()
 }
 
 
-int DrawCard(int[,] cardDeck)
+int DrawCard(int[,] cardArray)
 {
     int suit = cardSelect.Next(1, 4);
     int card = cardSelect.Next(1, 13);
-    int draw = cardDeck[suit, card];
+    int draw = cardArray[suit, card];
     bool validCard = false;
 
     do
@@ -127,7 +138,7 @@ int DrawCard(int[,] cardDeck)
         {
             suit = cardSelect.Next(1, 4);
             card = cardSelect.Next(1, 13);
-            draw = cardDeck[suit, card];
+            draw = cardArray[suit, card];
         }
     } while (validCard == false);
     return draw;
