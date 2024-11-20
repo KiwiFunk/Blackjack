@@ -2,6 +2,7 @@
 //create method for checking win conditions. this needs to be performed every time a hand is udated.
 
 
+
 // Create a 2D array to contain cards [x,y] x is the suit, y is the card
 int[,] cardDeck = new int[,]
     { { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 }, { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 },
@@ -12,31 +13,73 @@ Random cardSelect = new Random();
 string? returnResult;
 
 string[] players = { };                           //Array to store players
-
+bool[] inGame = new bool[0];                                  //Has the player folded or not.
 List<int>[] playerHand = new List<int>[0];        //Create an array of lists for player hand(s). Lists are more efficient to add and replace values
 int[] dealerHand = new int[0];
 
 double[,] bank = new double[0, 0];                //Using a 2D array to store money. Each row(player) has 2 columns, Index 0 holds bank balance, 1 Holds the current bet amount.
 int round = 0;
 
-bool gameStart = false;
-string playerNames = "";
-
 
 //Potentially implement an option for player limit, with 5 or 7 being the max. 4 may be better for the sake of a computer game.
 Console.WriteLine("Weclome to BlackJack!");
 InitializePlayers();
 Betting();
+
+//eventually assign into a loop that runs until win condition is reached. maybe use bool to tell if game over
 AssignCards("FirstRound");
 AssignCards("dealer");
-AssignCards("player");
-//HitOrStand
+HitOrStand();
+//Player loop where each player can decide to hit or stand (after the dealer has drawn if necessary), ends with incrementing the round number.)
 
 
-
-void AssignCards(string currentTurn)
+void EvaluateWinConditions()
 {
-    switch (currentTurn)
+    //if total of hand == 21 blackjack
+    //else if hand > 21 player is bust
+    //else if hand <
+    //else 
+
+}
+
+void HitOrStand()
+{
+    for (int i = 0; i < playerHand.Length; i++)
+    {
+        bool validInput = false;
+        if (inGame[i] == true)
+        {
+            Console.WriteLine($"{players[i]},");
+
+            Console.WriteLine($"Your current total is {playerHand[i].Sum()}, do you want to stand or hit?");
+            do
+            {
+                returnResult = Console.ReadLine();
+                if (returnResult != null)
+                {
+                    if (returnResult.ToLower().Trim() == "stand")
+                    {
+                        Console.WriteLine($"{players[i]} has decided to stand! The total of their hand is {playerHand[i].Sum()}");
+                        inGame[i] = false;
+                        validInput = true;
+                    }
+                    else if (returnResult.ToLower().Trim() == "hit")
+                    {
+                        Console.WriteLine($"{players[i]} has decided to hit!");
+                        AssignCards("player", i);
+                        validInput = true;
+                    }
+                    else Console.WriteLine("Invalid Input. Would you like to Hit or Stand?");
+                }
+            } while (validInput == false);
+        }
+    }
+}
+
+
+void AssignCards(string assignTo, int indexValue = 0)
+{
+    switch (assignTo)
     {
         case "FirstRound":
 
@@ -49,7 +92,7 @@ void AssignCards(string currentTurn)
             playerHand = new List<int>[players.Length];
             for (int i = 0; i < playerHand.Length; i++)
             {
-                playerHand[i] = new List<int> ();
+                playerHand[i] = new List<int>();
                 playerHand[i].Add(DrawCard(cardDeck));
                 playerHand[i].Add(DrawCard(cardDeck));
                 Console.WriteLine($"{players[i]} drew a {playerHand[i][0]} and {playerHand[i][1]} for a total of {(playerHand[i][0] + playerHand[i][1])}!");
@@ -59,34 +102,53 @@ void AssignCards(string currentTurn)
 
         case "player":
 
-            for (int i = 0; i <playerHand.Length; i++)
-            {
-                playerHand[i].Add(DrawCard(cardDeck));
-                Console.WriteLine($"{players[i]} draws a {playerHand[i][playerHand.Length - 1]} for a total of {playerHand[i].Sum()}.");
-                Console.WriteLine("Their current hand is:");
-                //Use .List to print the whole array address as a string instead of a foreach loop?
-                foreach (int card in playerHand[i])
-                {
-                    Console.Write($"{card}, ");
-                }
-                Console.WriteLine();
-                //evaluateWinConditions();
-            }
-            break;
-
-        case "dealer":
-
-            Array.Resize(ref dealerHand, dealerHand.Length + 1);
-            dealerHand[dealerHand.Length - 1] = DrawCard(cardDeck);        //Index is 0 based, so subtract 1
-            Console.WriteLine($"The dealer pulls a {dealerHand[dealerHand.Length - 1]} for a total of {dealerHand.Sum()}");
+            playerHand[indexValue].Add(DrawCard(cardDeck));
+            Console.WriteLine($"{players[indexValue]} draws a {playerHand[indexValue][playerHand.Length - 1]} for a total of {playerHand[indexValue].Sum()}.");
             Console.WriteLine("Their current hand is:");
-            foreach (int card in dealerHand)
+            //Use .List to print the whole array address as a string instead of a foreach loop?
+            foreach (int card in playerHand[indexValue])
             {
                 Console.Write($"{card}, ");
             }
             Console.WriteLine();
             //evaluateWinConditions();
             break;
+
+        case "dealer":
+            //if the total of the dealer hand is 17 or more they must stand. If the total is 16 or under, they must take a card.
+            //Work out conditions for if the dealer gets blackjack, or if the dealer does bust.
+
+
+            if (dealerHand.Sum() >= 17)
+            {
+                Array.Resize(ref dealerHand, dealerHand.Length + 1);
+                dealerHand[dealerHand.Length - 1] = DrawCard(cardDeck);        //Index is 0 based, so subtract 1
+
+                //if draw a card but its not bust or blackjack.
+                Console.WriteLine($"The dealer pulls a {dealerHand[dealerHand.Length - 1]} for a total of {dealerHand.Sum()}");
+                Console.WriteLine("Their current hand is:");
+                foreach (int card in dealerHand)
+                {
+                    Console.Write($"{card}, ");
+                }
+                Console.WriteLine();
+
+                //else if its blackjack
+                //Dealer has won, game end (check rules online)
+                //dealer has blackjack, you lose!
+
+                //else if dealer has gone bust
+                //Dealer has bust proceed with win conditions (check rules online)
+                //dealer has gone bust, players win!
+
+                break;
+            }
+            else
+            {
+                //this shouldnt need to execute. put it in main loop that dealer method will only be called if their hand is 16 or under
+                Console.WriteLine("Dealer has stood.");
+                break;
+            }
     }
 
 }
@@ -164,6 +226,8 @@ int DrawCard(int[,] cardArray)
 
 void InitializePlayers()
 {
+    bool gameStart = false;
+    string playerNames = "";
     Console.WriteLine("Please enter your Player Name(s) then hit return. Type Start to begin");
     do
     {
@@ -179,8 +243,13 @@ void InitializePlayers()
                 else
                 {
                     //Create an array out of the playerNames list
-                    players = playerNames.Trim().ToUpper().Split(" ");     //Trim whitespace from start and end, create an array from player names then set
-                    gameStart = true;
+                    players = playerNames.Trim().ToUpper().Split(" ");      //Trim whitespace from start and end, create an array from player names then set
+                    inGame = new bool[players.Length];                      //Init the boolean for each player
+                    for (int i = 0; i < inGame.Length; i++)
+                    {
+                        inGame[i] = true;
+                    }
+                    gameStart = true;                                       //Start the game
                 }
             }
             else
