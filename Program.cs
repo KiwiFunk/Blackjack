@@ -12,9 +12,9 @@ Random cardSelect = new Random();
 string? returnResult;
 
 string[] players = { };                          //Array to store players
-int[,] playerHand;                               //2D array to store current players hands. row= player, column = their cards init using players[].Length to decide x [x,]
-int[] dealerHand;
-double[,] bank = new double[0,0];                //Using a 2D array to store money. Each row(player) has 2 columns, Index 0 holds bank balance, 1 Holds the current bet amount.
+int[,] playerHand = new int[0, 0];                //2D array to store current players hands. row= player, column = their cards init using players[].Length to decide x [x,]
+int[] dealerHand = new int[0];
+double[,] bank = new double[0, 0];                //Using a 2D array to store money. Each row(player) has 2 columns, Index 0 holds bank balance, 1 Holds the current bet amount.
 int round = 0;
 
 bool gameStart = false;
@@ -25,54 +25,79 @@ string playerNames = "";
 Console.WriteLine("Weclome to BlackJack!");
 InitializePlayers();
 Betting();
-AssignCards();
+AssignCards("FirstRound");
+//HitOrStand
 
 
-void AssignCards()
+/*
+//test to make sure hand array for players is updating
+for (int i = 0; i < playerHand.GetLength(0); i++)
 {
-    //Use as temp card values to replace main
-    if (round == 0)
+    Console.WriteLine($"{players[i]}'s hand is: ");
+    for (int j = 0; j < playerHand.GetLength(1); j++)
     {
-        dealerHand = new int[2];
-        dealerHand[0] = DrawCard(cardDeck);
-        dealerHand[1] = DrawCard(cardDeck);
-        Console.WriteLine($"The dealer draws a {dealerHand[0]} and a face down card!");
-
-        playerHand = new int[players.Length, 2];
-        for (int i = 0; i < players.Length; i++)
-        {
-            playerHand[i, 0] = DrawCard(cardDeck);
-            playerHand[i, 1] = DrawCard(cardDeck);
-            Console.WriteLine($"{players[i]} drew a {playerHand[i, 0]} and {playerHand[i, 1]} for a total of {(playerHand[i, 0] + playerHand[i, 1])}!");
-        }
-
+        Console.Write($"{playerHand[i,j]}, ");
     }
+    Console.WriteLine();
 }
-    //currentPlayerHand
-    //currentDealerHand
-    /*
-    switch(switchCase)
-    {
-        case "FirstRound":
-        DrawCard(cardDeck);
-        
-        
-        
-        //If the first round is called, we need to give everyone TWO cards, and then make sure that one of the dealers is hidden (The dealer only reveals the hidden card after the players all fold.)
-        break;
-
-        case "player":
-        //Same as the dealer logic, only with an additional check to make sure that the correct player hand is updated
-        break;
-
-        case "dealer":
-        //Most basic Logic. get a card, add to hand, run the evaluateWinConditions() method.
-        break;
-    }
-}
-
 */
 
+
+
+void AssignCards(string currentTurn)
+{
+    switch (currentTurn)
+    {
+        case "FirstRound":
+
+            dealerHand = new int[2];
+            dealerHand[0] = DrawCard(cardDeck);
+            dealerHand[1] = DrawCard(cardDeck);
+            Console.WriteLine($"The dealer draws a {dealerHand[1]} and a face down card!");
+            //evaluateWinConditions();
+
+            playerHand = new int[players.Length, 2];
+            for (int i = 0; i < players.Length; i++)
+            {
+                playerHand[i, 0] = DrawCard(cardDeck);
+                playerHand[i, 1] = DrawCard(cardDeck);
+                Console.WriteLine($"{players[i]} drew a {playerHand[i, 0]} and {playerHand[i, 1]} for a total of {(playerHand[i, 0] + playerHand[i, 1])}!");
+                //evaluateWinConditions();
+            }
+            break;
+
+        case "player":
+            //Same as the dealer logic, only with an additional check to make sure that the correct player hand is updated
+            for (int i = 0; i < playerHand.GetLength(0); i++)
+            {
+
+        
+            }
+            break;
+
+        case "dealer":
+            Array.Resize(ref dealerHand, dealerHand.Length + 1);
+            dealerHand[dealerHand.Length - 1] = DrawCard(cardDeck);        //Index is 0 based, so subtract 1
+            Console.WriteLine($"The dealer pulls a {dealerHand[dealerHand.Length - 1]} for a total of {dealerHand.Sum()}");
+            Console.WriteLine("Their current hand is:");
+            foreach (int card in dealerHand)
+            {
+                Console.Write($"{card}, ");
+            }
+            Console.WriteLine();
+            //evaluateWinConditions();
+            break;
+
+    }
+
+
+    //Use as temp card values to replace main
+
+}
+
+
+//currentPlayerHand
+//currentDealerHand
 
 
 void Betting()
