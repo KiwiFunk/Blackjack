@@ -11,9 +11,11 @@ int totalCardsRemaining = 52;
 Random cardSelect = new Random();
 string? returnResult;
 
-string[] players = { };                          //Array to store players
-int[,] playerHand = new int[0, 0];                //2D array to store current players hands. row= player, column = their cards init using players[].Length to decide x [x,]
+string[] players = { };                           //Array to store players
+
+List<int>[] playerHand = new List<int>[0];        //Create an array of lists for player hand(s). Lists are more efficient to add and replace values
 int[] dealerHand = new int[0];
+
 double[,] bank = new double[0, 0];                //Using a 2D array to store money. Each row(player) has 2 columns, Index 0 holds bank balance, 1 Holds the current bet amount.
 int round = 0;
 
@@ -26,21 +28,9 @@ Console.WriteLine("Weclome to BlackJack!");
 InitializePlayers();
 Betting();
 AssignCards("FirstRound");
+AssignCards("dealer");
+AssignCards("player");
 //HitOrStand
-
-
-/*
-//test to make sure hand array for players is updating
-for (int i = 0; i < playerHand.GetLength(0); i++)
-{
-    Console.WriteLine($"{players[i]}'s hand is: ");
-    for (int j = 0; j < playerHand.GetLength(1); j++)
-    {
-        Console.Write($"{playerHand[i,j]}, ");
-    }
-    Console.WriteLine();
-}
-*/
 
 
 
@@ -56,26 +46,36 @@ void AssignCards(string currentTurn)
             Console.WriteLine($"The dealer draws a {dealerHand[1]} and a face down card!");
             //evaluateWinConditions();
 
-            playerHand = new int[players.Length, 2];
-            for (int i = 0; i < players.Length; i++)
+            playerHand = new List<int>[players.Length];
+            for (int i = 0; i < playerHand.Length; i++)
             {
-                playerHand[i, 0] = DrawCard(cardDeck);
-                playerHand[i, 1] = DrawCard(cardDeck);
-                Console.WriteLine($"{players[i]} drew a {playerHand[i, 0]} and {playerHand[i, 1]} for a total of {(playerHand[i, 0] + playerHand[i, 1])}!");
+                playerHand[i] = new List<int> ();
+                playerHand[i].Add(DrawCard(cardDeck));
+                playerHand[i].Add(DrawCard(cardDeck));
+                Console.WriteLine($"{players[i]} drew a {playerHand[i][0]} and {playerHand[i][1]} for a total of {(playerHand[i][0] + playerHand[i][1])}!");
                 //evaluateWinConditions();
             }
             break;
 
         case "player":
-            //Same as the dealer logic, only with an additional check to make sure that the correct player hand is updated
-            for (int i = 0; i < playerHand.GetLength(0); i++)
-            {
 
-        
+            for (int i = 0; i <playerHand.Length; i++)
+            {
+                playerHand[i].Add(DrawCard(cardDeck));
+                Console.WriteLine($"{players[i]} draws a {playerHand[i][playerHand.Length - 1]} for a total of {playerHand[i].Sum()}.");
+                Console.WriteLine("Their current hand is:");
+                //Use .List to print the whole array address as a string instead of a foreach loop?
+                foreach (int card in playerHand[i])
+                {
+                    Console.Write($"{card}, ");
+                }
+                Console.WriteLine();
+                //evaluateWinConditions();
             }
             break;
 
         case "dealer":
+
             Array.Resize(ref dealerHand, dealerHand.Length + 1);
             dealerHand[dealerHand.Length - 1] = DrawCard(cardDeck);        //Index is 0 based, so subtract 1
             Console.WriteLine($"The dealer pulls a {dealerHand[dealerHand.Length - 1]} for a total of {dealerHand.Sum()}");
@@ -87,17 +87,9 @@ void AssignCards(string currentTurn)
             Console.WriteLine();
             //evaluateWinConditions();
             break;
-
     }
 
-
-    //Use as temp card values to replace main
-
 }
-
-
-//currentPlayerHand
-//currentDealerHand
 
 
 void Betting()
