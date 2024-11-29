@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 
-// Create a 2D array to contain cards [x,y] x is the suit, y is the card
-int[,] cardDeck = new int[,]
+int[,] cardDeck = new int[,]                        // Create a 2D array to contain cards [x,y] x is the suit, y is the card
     { { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 }, { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 },
     { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 }, { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 } };
 
@@ -14,20 +13,30 @@ bool[] inGame = new bool[0];                        //Is the player currently in
 List<int>[] playerHand = new List<int>[0];          //Create an array of lists for player hand(s). Lists are more efficient to add and replace values
 int[] dealerHand = new int[0];
 double[,] bank = new double[0, 0];                  //Using a 2D array to store money. Each row(player) has 2 columns, Index 0 holds bank balance, 1 Holds the current bet amount.
-int round = 0;
-bool validInput = false;                            
+bool validInput = false;
 
 //Program start
-Console.WriteLine("Weclome to BlackJack!");
-Thread.Sleep(2000);
+TitleScreen();
 InitializePlayers();
 Betting();
 AssignCards("FirstRound");
 AssignCards("dealer");
 HitOrStand();
 
-//Player loop where each player can decide to hit or stand (after the dealer has drawn if necessary), ends with incrementing the round number.)
-
+void TitleScreen()
+{
+    Console.Clear();
+    Console.WriteLine(@"
+    ______ _            _      ___            _    
+    | ___ \ |          | |    |_  |          | |   
+    | |_/ / | __ _  ___| | __   | | __ _  ___| | __
+    | ___ \ |/ _` |/ __| |/ /   | |/ _` |/ __| |/ /
+    | |_/ / | (_| | (__|   </\__/ / (_| | (__|   < 
+    \____/|_|\__,_|\___|_|\_\____/ \__,_|\___|_|\_\
+                                                   ");
+    Console.WriteLine("\t\tPress Any Key To Begin");
+    Console.ReadKey();
+}
 
 void EvaluateWinConditions(int currentPlayer)               //Call from each HitOrStandLoop
 {
@@ -61,6 +70,7 @@ void HitOrStand()           //add a loop until each player has reached a win con
     {
         if (inGame[i] == true)
         {
+            Console.Clear();
             Console.WriteLine($"{players[i]},");
 
             Console.WriteLine($"Your current total is {playerHand[i].Sum()}, do you want to stand or hit?");
@@ -98,7 +108,9 @@ void AssignCards(string assignTo, int indexValue = 0)
             dealerHand = new int[2];
             dealerHand[0] = DrawCard(cardDeck);
             dealerHand[1] = DrawCard(cardDeck);
-            Console.WriteLine($"The dealer draws a {dealerHand[1]} and a face down card!");
+            Console.WriteLine($"Dealer draws a {dealerHand[1]} and a face down card!");
+            Console.WriteLine();
+            Thread.Sleep(1000);
             //evaluateWinConditions();
 
             playerHand = new List<int>[players.Length];
@@ -112,7 +124,7 @@ void AssignCards(string assignTo, int indexValue = 0)
                 {
                     inGame[i] = false;
                     int total = playerHand[i].Sum();
-                    Console.WriteLine($"Player was dealt {total}!");
+                    Console.WriteLine($"{players[i]} was dealt {total}!");
                 }
                 //evaluateWinConditions();
             }
@@ -202,6 +214,7 @@ void Betting()
             {
                 if (currentWager <= bank[i, 0])
                 {
+                    Console.Clear();
                     Console.WriteLine($"{players[i]} wagered ${currentWager:N2}! Good Luck!");
                     bank[i, 1] = currentWager;
                     validEnty = true;
@@ -283,7 +296,7 @@ void InitializePlayers()
                 playerNames += returnResult.Trim() + " ";
                 Console.Clear();
                 Console.WriteLine($"{returnResult.ToUpper()} Registered. Enter another name, or type start to begin!");
-                
+
             }
         }
         else Console.WriteLine("Please enter a valid name!");
