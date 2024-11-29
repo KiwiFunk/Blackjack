@@ -1,8 +1,8 @@
 ﻿using System.Linq;
 
-int[,] cardDeck = new int[,]                        // Create a 2D array to contain cards [x,y] x is the suit, y is the card
-    { { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 }, { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 },
-    { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 }, { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 } };
+int[,] cardDeck = new int[,]                        // Create a 2D array to contain cards [x,y] x is the suit, y is the card. In Blackjack Jack, Queen and King also count as 10
+    { { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10 }, { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10 },
+    { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10 }, { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10 } };
 
 int totalCardsRemaining = 52;
 Random cardSelect = new Random();
@@ -41,7 +41,6 @@ void TitleScreen()
 void EvaluateWinConditions(int currentPlayer)               //Call from each HitOrStandLoop
 {
     int totalScore = playerHand[currentPlayer].Sum();       //calculate sum of list at input array index
-    Console.WriteLine(totalScore);
 
     if (totalScore == 21)           //if hand total is 21 and they have Blackjack
     {
@@ -68,14 +67,16 @@ void HitOrStand()           //add a loop until each player has reached a win con
 {
     for (int i = 0; i < playerHand.Length; i++)
     {
+        validInput = false;
         if (inGame[i] == true)
         {
-            Console.Clear();
-            Console.WriteLine($"{players[i]},");
-
-            Console.WriteLine($"Your current total is {playerHand[i].Sum()}, do you want to stand or hit?");
             do
             {
+                Console.Clear();
+                Console.Write($"{players[i]}, ");
+
+                Console.WriteLine($"Your current total is {playerHand[i].Sum()}, do you want to stand or hit?");
+           
                 returnResult = Console.ReadLine();
                 if (returnResult != null)
                 {
@@ -93,6 +94,7 @@ void HitOrStand()           //add a loop until each player has reached a win con
                     }
                     else Console.WriteLine("Invalid Input. Would you like to Hit or Stand?");
                 }
+                Thread.Sleep(1000);
             } while (validInput == false);
         }
     }
@@ -126,15 +128,18 @@ void AssignCards(string assignTo, int indexValue = 0)
                     int total = playerHand[i].Sum();
                     Console.WriteLine($"{players[i]} was dealt {total}!");
                 }
+                Console.WriteLine();
+                Thread.Sleep(1000);
                 //evaluateWinConditions();
             }
+            Thread.Sleep(4000);
             break;
 
         case "player":
 
             playerHand[indexValue].Add(DrawCard(cardDeck));
             Console.WriteLine($"{players[indexValue]} draws a {playerHand[indexValue][playerHand.Length - 1]} for a total of {playerHand[indexValue].Sum()}.");
-            Console.WriteLine("Their current hand is:");
+            Console.Write("Their current hand is: ");
             //Use .List to print the whole array address as a string instead of a foreach loop?
             foreach (int card in playerHand[indexValue])
             {
@@ -142,6 +147,7 @@ void AssignCards(string assignTo, int indexValue = 0)
             }
             Console.WriteLine();
             //evaluateWinConditions();
+            Thread.Sleep(2000);
             break;
 
         case "dealer":
@@ -199,7 +205,7 @@ void Betting()
         }
         if (players.Length <= 1) Console.WriteLine("You have been given $10.00 as a new player bonus!");
         else Console.WriteLine("You have each been given a new player bonus of $10.00!");
-        Thread.Sleep(2000);
+        Thread.Sleep(1500);
     }
     for (int i = 0; i < players.Length; i++)
     {
@@ -218,7 +224,7 @@ void Betting()
                     Console.WriteLine($"{players[i]} wagered ${currentWager:N2}! Good Luck!");
                     bank[i, 1] = currentWager;
                     validEnty = true;
-                    Thread.Sleep(2000);
+                    Thread.Sleep(1000);
                 }
                 else Console.WriteLine($"Your bank balance is only {bank[i, 0]:N2}, please wager an amount you can afford!");
             }
@@ -230,7 +236,7 @@ void Betting()
     }
     Console.Clear();
     Console.WriteLine("All bets have been taken! Let the game begin!");
-    Thread.Sleep(2000);
+    Thread.Sleep(1500);
     Console.Clear();
 }
 
