@@ -1,7 +1,4 @@
-﻿
-//create method for checking win conditions. this needs to be performed every time a hand is udated.
-
-
+﻿using System.Linq;
 
 // Create a 2D array to contain cards [x,y] x is the suit, y is the card
 int[,] cardDeck = new int[,]
@@ -12,41 +9,56 @@ int totalCardsRemaining = 52;
 Random cardSelect = new Random();
 string? returnResult;
 
-string[] players = { };                           //Array to store players
-bool[] inGame = new bool[0];                                  //Has the player folded or not.
-List<int>[] playerHand = new List<int>[0];        //Create an array of lists for player hand(s). Lists are more efficient to add and replace values
+string[] players = { };                             //Array to store players
+bool[] inGame = new bool[0];                        //Is the player currently in the game loop
+List<int>[] playerHand = new List<int>[0];          //Create an array of lists for player hand(s). Lists are more efficient to add and replace values
 int[] dealerHand = new int[0];
-
-double[,] bank = new double[0, 0];                //Using a 2D array to store money. Each row(player) has 2 columns, Index 0 holds bank balance, 1 Holds the current bet amount.
+double[,] bank = new double[0, 0];                  //Using a 2D array to store money. Each row(player) has 2 columns, Index 0 holds bank balance, 1 Holds the current bet amount.
 int round = 0;
+bool validInput = false;                            
 
-
-//Potentially implement an option for player limit, with 5 or 7 being the max. 4 may be better for the sake of a computer game.
+//Program start
 Console.WriteLine("Weclome to BlackJack!");
+Thread.Sleep(2000);
 InitializePlayers();
 Betting();
-
-//eventually assign into a loop that runs until win condition is reached. maybe use bool to tell if game over
 AssignCards("FirstRound");
 AssignCards("dealer");
 HitOrStand();
+
 //Player loop where each player can decide to hit or stand (after the dealer has drawn if necessary), ends with incrementing the round number.)
 
 
-void EvaluateWinConditions()
+void EvaluateWinConditions(int currentPlayer)               //Call from each HitOrStandLoop
 {
-    //if total of hand == 21 blackjack
-    //else if hand > 21 player is bust
-    //else if hand <
-    //else 
+    int totalScore = playerHand[currentPlayer].Sum();       //calculate sum of list at input array index
+    Console.WriteLine(totalScore);
+
+    if (totalScore == 21)           //if hand total is 21 and they have Blackjack
+    {
+        Console.WriteLine($"{players[currentPlayer]} has Blackjack!");
+        validInput = true;
+        //set a bool variable to break loop
+        //Calculate payouts in a new method
+    }
+    else if (totalScore >= 22)      //If the player hand is over 21 and they have gone bust
+    {
+        Console.WriteLine($"{players[currentPlayer]} has gone bust with a total of {totalScore}!");
+        validInput = true;
+        //set a bool variable to break loop
+        //Calculate payouts
+    }
+    else                            //If player doesnt have a total of 21 yet
+    {
+        // add something herelater
+    }
 
 }
 
-void HitOrStand()
+void HitOrStand()           //add a loop until each player has reached a win condition
 {
     for (int i = 0; i < playerHand.Length; i++)
     {
-        bool validInput = false;
         if (inGame[i] == true)
         {
             Console.WriteLine($"{players[i]},");
@@ -67,7 +79,7 @@ void HitOrStand()
                     {
                         Console.WriteLine($"{players[i]} has decided to hit!");
                         AssignCards("player", i);
-                        validInput = true;
+                        EvaluateWinConditions(i);
                     }
                     else Console.WriteLine("Invalid Input. Would you like to Hit or Stand?");
                 }
@@ -96,6 +108,12 @@ void AssignCards(string assignTo, int indexValue = 0)
                 playerHand[i].Add(DrawCard(cardDeck));
                 playerHand[i].Add(DrawCard(cardDeck));
                 Console.WriteLine($"{players[i]} drew a {playerHand[i][0]} and {playerHand[i][1]} for a total of {(playerHand[i][0] + playerHand[i][1])}!");
+                if (playerHand[i].Sum() >= 21)
+                {
+                    inGame[i] = false;
+                    int total = playerHand[i].Sum();
+                    Console.WriteLine($"Player was dealt {total}!");
+                }
                 //evaluateWinConditions();
             }
             break;
@@ -169,10 +187,12 @@ void Betting()
         }
         if (players.Length <= 1) Console.WriteLine("You have been given $10.00 as a new player bonus!");
         else Console.WriteLine("You have each been given a new player bonus of $10.00!");
+        Thread.Sleep(2000);
     }
     for (int i = 0; i < players.Length; i++)
     {
         validEnty = false;
+        Console.Clear();
         Console.WriteLine($"Current Player: {players[i]}");
         Console.WriteLine($"You have ${bank[i, 0]:N2},how much do you want to wager?");
         do
@@ -185,6 +205,7 @@ void Betting()
                     Console.WriteLine($"{players[i]} wagered ${currentWager:N2}! Good Luck!");
                     bank[i, 1] = currentWager;
                     validEnty = true;
+                    Thread.Sleep(2000);
                 }
                 else Console.WriteLine($"Your bank balance is only {bank[i, 0]:N2}, please wager an amount you can afford!");
             }
@@ -194,7 +215,10 @@ void Betting()
             }
         } while (validEnty == false);
     }
+    Console.Clear();
     Console.WriteLine("All bets have been taken! Let the game begin!");
+    Thread.Sleep(2000);
+    Console.Clear();
 }
 
 
@@ -226,6 +250,7 @@ int DrawCard(int[,] cardArray)
 
 void InitializePlayers()
 {
+    Console.Clear();
     bool gameStart = false;
     string playerNames = "";
     Console.WriteLine("Please enter your Player Name(s) then hit return. Type Start to begin");
@@ -250,12 +275,15 @@ void InitializePlayers()
                         inGame[i] = true;
                     }
                     gameStart = true;                                       //Start the game
+                    Console.Clear();
                 }
             }
             else
             {
                 playerNames += returnResult.Trim() + " ";
-                Console.WriteLine($"{returnResult} Registered. Enter another name, or type start to begin!");
+                Console.Clear();
+                Console.WriteLine($"{returnResult.ToUpper()} Registered. Enter another name, or type start to begin!");
+                
             }
         }
         else Console.WriteLine("Please enter a valid name!");
