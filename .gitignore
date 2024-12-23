@@ -1,1 +1,7 @@
 TODO.txt
+.vscode/
+bin/
+obj/
+.DS_Store
+Blackjack.sln
+GameInstructions.txt
