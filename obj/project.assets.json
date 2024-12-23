@@ -8,24 +8,26 @@
     "net8.0": []
   },
   "packageFolders": {
-    "/Users/alex/.nuget/packages/": {}
+    "C:\\Users\\Alex\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/alex/Documents/GitHub/Blackjack/Blackjack.csproj",
+      "projectUniqueName": "C:\\Users\\Alex\\Documents\\GitHub\\Blackjack\\Blackjack.csproj",
       "projectName": "Blackjack",
-      "projectPath": "/Users/alex/Documents/GitHub/Blackjack/Blackjack.csproj",
-      "packagesPath": "/Users/alex/.nuget/packages/",
-      "outputPath": "/Users/alex/Documents/GitHub/Blackjack/obj/",
+      "projectPath": "C:\\Users\\Alex\\Documents\\GitHub\\Blackjack\\Blackjack.csproj",
+      "packagesPath": "C:\\Users\\Alex\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Alex\\Documents\\GitHub\\Blackjack\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/Users/alex/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\Alex\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -64,7 +66,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.404/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.403/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
