@@ -6,12 +6,10 @@ int totalCardsRemaining = 52;
 Random cardSelect = new Random();                       //Init a random function for selecting a card.
 string? returnResult;
 
-string[] players = { };                                 //Array to store players
-bool[] inGame = new bool[0];                            //Is the player currently in the game loop
-bool[] isBust = new bool[0];
+List<Player> players = new List<Player>();
 
 List<Cards>[] playerHand = new List<Cards>[0];          //Create an array of lists for player hand(s). Lists are more efficient to add and replace values
-Cards[] dealerHand = new Cards[0];                      //Array for dealer hand. Could update to list in the future.
+Cards[] dealerHand = Array.Empty<Cards>();              //Array for dealer hand. Could update to list in the future.
 
 double[,] bank = new double[0, 0];                      //Each row(player) has 2 columns, Index 0 holds bank balance, 1 Holds the current bet amount.
 
@@ -23,12 +21,12 @@ TitleScreen();                                          //Display Title Screen
 InitializePlayers();                                    //Init Players
 Betting();                                              //Take Bets for each Player in the game
 DealCards();                                            //Deal Cards for each player. Two face up each. Deal Cards for dealer, 1 face up, 1 face down.
-for (int i = 0; i < players.Length; i++)                //Iterate though player loop, moving on to the next once they have either stood, or gone bust.
+for (int i = 0; i < players.Count; i++)                 //Iterate though player loop, moving on to the next once they have either stood, or gone bust.
 {
     do
     {
         //Console.Clear();
-        Console.WriteLine($"Current player: {players[i]}");
+        Console.WriteLine($"Current player: {players[i].playerName}");
         ShowHand(i);
         Console.WriteLine("Do you want to Hit, or Stand?");
         returnResult = Console.ReadLine();
@@ -44,7 +42,7 @@ for (int i = 0; i < players.Length; i++)                //Iterate though player 
             }
             else Console.WriteLine("Invalid Input. Would you like to Hit or Stand?");
         }
-    } while (inGame[i]);                                //Repeat loop while player is not Bust, and hasn't Stood
+    } while (players[i].inGame);                                //Repeat loop while player is not Bust, and hasn't Stood
 }
 DealerPlay();                                           //Once Every player has stood or busted, Dealer takes their turn
 GameEnd();                                              //Prompt replay, new game, or quit.
@@ -149,7 +147,6 @@ void InitializePlayers()
 {
     //Console.Clear();
     bool gameStart = false;
-    string playerNames = "";
     Console.WriteLine("Please enter your Player Name(s) then hit return. Type Start to begin");
     do
     {
@@ -158,27 +155,24 @@ void InitializePlayers()
         {
             if (returnResult.ToLower().Trim() == "start")
             {
-                if (playerNames == "")
+                if (players.Count == 0)
                 {
                     Console.WriteLine("You need to enter at least one name before starting!");
                 }
                 else
                 {
-                    players = playerNames.Trim().ToUpper().Split(" ");      //Convert inputted data into array of players. Use trim to remove the additional space at the end to prevent a false player addition.
-                    inGame = new bool[players.Length];                      //Creating a boolean value to check if player has stood or not.
-                    isBust = new bool[players.Length];                      //Boolean for checking if player is bust or not
-                    for (int i = 0; i < inGame.Length; i++)
-                    {
-                        inGame[i] = true;
-                        isBust[i] = false;
-                    }
                     gameStart = true;                                       //Start the game
                     //Console.Clear();
                 }
             }
             else
             {
-                playerNames += returnResult.Trim() + " ";
+                Player player = new Player();
+                player.playerName = $"{returnResult.ToUpper().Trim()}";
+                player.inGame = true;
+                player.isBust = false;
+                player.hasAce = false;
+                players.Add(player);
                 //Console.Clear();
                 Console.WriteLine($"{returnResult.ToUpper()} Registered. Enter another name, or type start to begin!");
             }
@@ -187,30 +181,33 @@ void InitializePlayers()
     } while (!gameStart);
 }
 
+
+
 void Betting()
 {
     bool validEnty = false;
     double currentWager = 0.0;
     if (bank.Length == 0)                                                   //Check to see if game is a new game, or continuation
     {
-        double[,] bankInit = new double[players.Length, 2];
+        double[,] bankInit = new double[players.Count, 2];
         bank = bankInit;
-        for (int i = 0; i < players.Length; i++)
+        for (int i = 0; i < players.Count; i++)
         {
             bank[i, 0] = 10.00;                                             //Starting Bank balance   
             bank[i, 1] = 0.00;                                              //Current Bet Amount
         }
-        if (players.Length <= 1) Console.WriteLine("You have been given $10.00 as a new player bonus!");
+        if (players.Count <= 1) Console.WriteLine("You have been given $10.00 as a new player bonus!");
         else Console.WriteLine("You have each been given a new player bonus of $10.00!");
         GamePause();
     }
 
-    for (int i = 0; i < players.Length; i++)
+    for (int i = 0; i < players.Count; i++)
     {
         validEnty = false;
         //Console.Clear();
-        Console.WriteLine($"Current Player: {players[i]}");
+        Console.WriteLine($"Current Player: {players[i].playerName}");
         Console.WriteLine($"You have ${bank[i, 0]:N2},how much do you want to wager?");
+
         do
         {
             returnResult = Console.ReadLine();
@@ -219,7 +216,7 @@ void Betting()
                 if (currentWager <= bank[i, 0])
                 {
                     //Console.Clear();
-                    Console.WriteLine($"{players[i]} wagered ${currentWager:N2}! Good Luck!");
+                    Console.WriteLine($"{players[i].playerName} wagered ${currentWager:N2}! Good Luck!");
                     bank[i, 1] = currentWager;
                     bank[i, 0] -= currentWager;                             //Remove wagered amount from bank balance.
                     validEnty = true;
@@ -273,13 +270,13 @@ void DealCards()
     Console.WriteLine();
     GamePause();
 
-    playerHand = new List<Cards>[players.Length];
+    playerHand = new List<Cards>[players.Count];
     for (int i = 0; i < playerHand.Length; i++)
     {
         playerHand[i] = new List<Cards>();
         playerHand[i].Add(DrawCard(cardDeck));
         playerHand[i].Add(DrawCard(cardDeck));
-        Console.WriteLine($"{players[i]} drew a {playerHand[i][0].value} and {playerHand[i][1].value} for a total of {TotalValue("player", i)}!");
+        Console.WriteLine($"{players[i].playerName} drew a {playerHand[i][0].value} and {playerHand[i][1].value} for a total of {TotalValue("player", i)}!");
         Console.WriteLine();
         GamePause();
     }
@@ -287,21 +284,21 @@ void DealCards()
 
 void Hit(int currentPlayer)
 {
-    Console.WriteLine($"{players[currentPlayer]} has decided to hit!");
+    Console.WriteLine($"{players[currentPlayer].playerName} has decided to hit!");
     playerHand[currentPlayer].Add(DrawCard(cardDeck));
 
     //Handle Bust condition. Remove player from current loop. Remove their bet from bank balance.
     if (TotalValue("player", currentPlayer) > 21)
     {
-        Console.WriteLine($"BUST!! {players[currentPlayer]} drew a {playerHand[currentPlayer].Last().value} for a total of {TotalValue("player", currentPlayer)}!");
-        inGame[currentPlayer] = false;
-        isBust[currentPlayer] = true;
+        Console.WriteLine($"BUST!! {players[currentPlayer].playerName} drew a {playerHand[currentPlayer].Last().value} for a total of {TotalValue("player", currentPlayer)}!");
+        players[currentPlayer].inGame = false;
+        players[currentPlayer].isBust = true;
         bank[currentPlayer, 0] -= bank[currentPlayer, 1];
         GamePause();
     }
     else
     {
-        Console.WriteLine($"{players[currentPlayer]} drew a {playerHand[currentPlayer].Last().value} for a total of {TotalValue("player", currentPlayer)}!");
+        Console.WriteLine($"{players[currentPlayer].playerName} drew a {playerHand[currentPlayer].Last().value} for a total of {TotalValue("player", currentPlayer)}!");
         GamePause();
     }
 }
@@ -309,8 +306,8 @@ void Hit(int currentPlayer)
 void Stand(int currentPlayer)
 {
     //Console.Clear();
-    Console.WriteLine($"{players[currentPlayer]} has decided to stand! The total of their hand is {TotalValue("player", currentPlayer)}.");
-    inGame[currentPlayer] = false;
+    Console.WriteLine($"{players[currentPlayer].playerName} has decided to stand! The total of their hand is {TotalValue("player", currentPlayer)}.");
+    players[currentPlayer].inGame = false;
     GamePause();
 }
 
@@ -334,12 +331,12 @@ void DealerPlay()
             {
                 Console.WriteLine("Dealer has gone Bust!");
                 bool playerCashedOut = false;
-                for (int i = 0; i < players.Length; i++)
+                for (int i = 0; i < players.Count; i++)
                 {
-                    if (!isBust[i])
+                    if (!players[i].isBust)
                     {
                         bank[i, 0] += bank[i, 1] * 2;
-                        Console.WriteLine($"Congrats {players[i]}, you win! Your bank balance is now ${bank[i, 0]}!");
+                        Console.WriteLine($"Congrats {players[i].playerName}, you win! Your bank balance is now ${bank[i, 0]}!");
                         playerCashedOut = true;
                     }
                 }
@@ -362,21 +359,21 @@ void Cashout()
     //Console.Clear();
     int dealerTotal = TotalValue("dealer");
     Console.WriteLine($"Dealer total is {dealerTotal}.");
-    for (int i = 0; i < players.Length; i++)
+    for (int i = 0; i < players.Count; i++)
     {
         int playerTotal = TotalValue("player", i);
         //If player hand higher, they win. If equal, they only recieve their original bet amount. If less, they lose.
-        if (playerTotal > dealerTotal && !isBust[i])
+        if (playerTotal > dealerTotal && !players[i].isBust)
         {
             bank[i, 0] += bank[i, 1] * 2;
-            Console.WriteLine($"Congrats {players[i]}, you win! Your bank balance is now ${bank[i, 0]}!");
+            Console.WriteLine($"Congrats {players[i].playerName}, you win! Your bank balance is now ${bank[i, 0]}!");
         }
 
-        else if (playerTotal == dealerTotal && !isBust[i]) Console.WriteLine($"Better than nothing {players[i]}, you tie!");
+        else if (playerTotal == dealerTotal && !players[i].isBust) Console.WriteLine($"Better than nothing {players[i].playerName}, you tie!");
 
         else
         {
-            Console.WriteLine($"Sorry {players[i]}, you lose...");
+            Console.WriteLine($"Sorry {players[i].playerName}, you lose...");
             bank[i, 0] -= bank[i, 1];
         }
     }
