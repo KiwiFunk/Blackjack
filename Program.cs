@@ -27,7 +27,7 @@ for (int i = 0; i < players.Length; i++)                //Iterate though player 
 {
     do
     {
-        Console.Clear();
+        //Console.Clear();
         Console.WriteLine($"Current player: {players[i]}");
         ShowHand(i);
         Console.WriteLine("Do you want to Hit, or Stand?");
@@ -52,7 +52,7 @@ GameEnd();                                              //Prompt replay, new gam
 
 ///Methods///
 
-void GamePause() => Thread.Sleep(2000);                 //Allows for globally adjusting the pause duration.
+void GamePause() => Thread.Sleep(500);                 //Allows for globally adjusting the pause duration.
 
 int TotalValue(string dealerOrPlayer, int index = 0)    //Take input for which player
 {
@@ -132,7 +132,7 @@ void BuildDeck()
 
 void TitleScreen()
 {
-    Console.Clear();
+    //Console.Clear();
     Console.WriteLine(@"
     ______ _            _      ___            _    
     | ___ \ |          | |    |_  |          | |   
@@ -147,7 +147,7 @@ void TitleScreen()
 
 void InitializePlayers()
 {
-    Console.Clear();
+    //Console.Clear();
     bool gameStart = false;
     string playerNames = "";
     Console.WriteLine("Please enter your Player Name(s) then hit return. Type Start to begin");
@@ -173,13 +173,13 @@ void InitializePlayers()
                         isBust[i] = false;
                     }
                     gameStart = true;                                       //Start the game
-                    Console.Clear();
+                    //Console.Clear();
                 }
             }
             else
             {
                 playerNames += returnResult.Trim() + " ";
-                Console.Clear();
+                //Console.Clear();
                 Console.WriteLine($"{returnResult.ToUpper()} Registered. Enter another name, or type start to begin!");
             }
         }
@@ -208,7 +208,7 @@ void Betting()
     for (int i = 0; i < players.Length; i++)
     {
         validEnty = false;
-        Console.Clear();
+        //Console.Clear();
         Console.WriteLine($"Current Player: {players[i]}");
         Console.WriteLine($"You have ${bank[i, 0]:N2},how much do you want to wager?");
         do
@@ -218,7 +218,7 @@ void Betting()
             {
                 if (currentWager <= bank[i, 0])
                 {
-                    Console.Clear();
+                    //Console.Clear();
                     Console.WriteLine($"{players[i]} wagered ${currentWager:N2}! Good Luck!");
                     bank[i, 1] = currentWager;
                     bank[i, 0] -= currentWager;                             //Remove wagered amount from bank balance.
@@ -232,10 +232,10 @@ void Betting()
         } while (!validEnty);
     }
 
-    Console.Clear();
+    //Console.Clear();
     Console.WriteLine("All bets have been taken! Let the game begin!");
     GamePause();
-    Console.Clear();
+    //Console.Clear();
 }
 
 Cards DrawCard(Cards[,] cardArray)
@@ -308,7 +308,7 @@ void Hit(int currentPlayer)
 
 void Stand(int currentPlayer)
 {
-    Console.Clear();
+    //Console.Clear();
     Console.WriteLine($"{players[currentPlayer]} has decided to stand! The total of their hand is {TotalValue("player", currentPlayer)}.");
     inGame[currentPlayer] = false;
     GamePause();
@@ -359,7 +359,7 @@ void DealerPlay()
 
 void Cashout()
 {
-    Console.Clear();
+    //Console.Clear();
     int dealerTotal = TotalValue("dealer");
     Console.WriteLine($"Dealer total is {dealerTotal}.");
     for (int i = 0; i < players.Length; i++)
@@ -385,7 +385,7 @@ void Cashout()
 
 void GameEnd()
 {
-    //Console.Clear();
+    ////Console.Clear();
     bool gameEnd = false;
     Console.WriteLine("Thanks for playing! Type 1 to start a new round, 2 for a New Game, or 3 to Quit!");
     do
