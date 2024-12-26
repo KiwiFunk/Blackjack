@@ -50,7 +50,7 @@ GameEnd();                                              //Prompt replay, new gam
 
 void GamePause() => Thread.Sleep(500);                  //Allows for globally adjusting the pause duration.
 
-int TotalValue(int index)    
+int TotalValue(int index)
 {
     int totalValue = 0;
     foreach (var card in hands[index])
@@ -60,7 +60,7 @@ int TotalValue(int index)
     return totalValue;
 }
 
-void ShowHand(int currentPlayer) 
+void ShowHand(int currentPlayer)
 {
     Console.WriteLine($"Your hand is currently: ");
     for (int i = 0; i < hands[currentPlayer].Count(); i++)
@@ -69,6 +69,33 @@ void ShowHand(int currentPlayer)
     }
     Console.WriteLine("");
     Console.WriteLine($"For a total of {TotalValue(currentPlayer)}");
+}
+
+void CheckforAces(int player = 0)                       //If player index is given, use that. Else default to dealer index.
+{
+    if (!players[player].hasAce) return;                //If player flagged for ace, run method, else return.
+
+    int handTotal = TotalValue(player);
+
+    foreach (var card in hands[player])
+    {
+        if (card.name == "Ace" && card.value == 1)
+        {
+            card.value = 11;
+            handTotal += 10;
+        }
+    }
+
+    foreach (var card in hands[player])
+    {
+        if (card.name == "Ace" && handTotal > 21)
+        {
+            card.value = 1;
+            handTotal -= 10;
+            if (handTotal <= 21) break;
+        }
+    }
+    //Player can't be bust before using Hit(), and Hit() handles bust condition.
 }
 
 void BuildDeck()
@@ -216,10 +243,10 @@ void Betting()
     //Console.Clear();
 }
 
-Cards DrawCard(Cards[,] cardArray)
+Cards DrawCard(Cards[,] cardArray, int player = 0)                          //Take in int for player index to use for assigning ace status.
 {
-    int suit = cardSelect.Next(1, 4);
-    int card = cardSelect.Next(1, 13);
+    int suit = cardSelect.Next(0, 4);                                       //Arrays are zero based. .Next upper bound is exclusive, so will never return 4.
+    int card = cardSelect.Next(0, 13);
     Cards draw = cardArray[suit, card];
     bool validCard = false;
 
@@ -228,16 +255,17 @@ Cards DrawCard(Cards[,] cardArray)
         if (!cardDeck[suit, card].inPlay)                                    //If the selected array address is valid, replace it with 0, decrement total cards.
         {
             cardDeck[suit, card].inPlay = true;
-            if(cardDeck[suit, card].name == "Ace")
+            if (cardDeck[suit, card].name == "Ace")
             {
+                players[player].hasAce = true;
             }
             totalCardsRemaining--;
             validCard = true;
         }
-        else                                                                //If selected address has already been set to 0, select a new one.
+        else                                                                //If selected address .inPlay == true, select a new one.
         {
-            suit = cardSelect.Next(1, 4);
-            card = cardSelect.Next(1, 13);
+            suit = cardSelect.Next(0, 4);
+            card = cardSelect.Next(0, 13);
             draw = cardArray[suit, card];
         }
     } while (!validCard);
@@ -251,7 +279,8 @@ void DealCards()
     hands[0] = new List<Cards>();
     hands[0].Add(DrawCard(cardDeck));
     hands[0].Add(DrawCard(cardDeck));
-    Console.WriteLine($"Dealer draws a {hands[0][1].value} and a face down card!");
+    CheckforAces();
+    Console.WriteLine($"Dealer draws a {hands[0][1].CardName}({hands[0][1].value}) and a face down card!");
     Console.WriteLine();
     GamePause();
 
@@ -259,9 +288,9 @@ void DealCards()
     for (int i = 1; i < hands.Length; i++)
     {
         hands[i] = new List<Cards>();
-        hands[i].Add(DrawCard(cardDeck));
-        hands[i].Add(DrawCard(cardDeck));
-        //CheckforAces
+        hands[i].Add(DrawCard(cardDeck, i));
+        hands[i].Add(DrawCard(cardDeck, i));
+        CheckforAces(i);
         Console.WriteLine($"{players[i].playerName} drew a {hands[i][0].value} and {hands[i][1].value} for a total of {TotalValue(i)}!");
         Console.WriteLine();
         GamePause();
@@ -271,8 +300,8 @@ void DealCards()
 void Hit(int currentPlayer)
 {
     Console.WriteLine($"{players[currentPlayer].playerName} has decided to hit!");
-    hands[currentPlayer].Add(DrawCard(cardDeck));
-
+    hands[currentPlayer].Add(DrawCard(cardDeck, currentPlayer));
+    CheckforAces(currentPlayer);
     //Handle Bust condition. Remove player from current loop. Remove their bet from bank balance.
     if (TotalValue(currentPlayer) > 21)
     {
@@ -309,6 +338,7 @@ void DealerPlay()
         if (TotalValue(0) < 17)     //Dealer Index is 0
         {
             hands[0].Add(DrawCard(cardDeck));
+            CheckforAces();
             Console.WriteLine($"Dealer draws a {hands[0][hands[0].Count() - 1].CardName}({hands[0][hands[0].Count() - 1].value}) for a total of {TotalValue(0)}.");
 
             //If dealer busts, every player who STOOD and didn't bust win.
