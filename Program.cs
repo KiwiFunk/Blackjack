@@ -1,15 +1,13 @@
 ﻿using BlackjackGame;
 
 Cards[,] cardDeck = new Cards[4, 13];
-
 int totalCardsRemaining = 52;
 Random cardSelect = new Random();                       //Init a random function for selecting a card.
+
 string? returnResult;
 
-List<Player> players = new List<Player>();
-
-List<Cards>[] playerHand = new List<Cards>[0];          //Create an array of lists for player hand(s). Lists are more efficient to add and replace values
-Cards[] dealerHand = Array.Empty<Cards>();              //Array for dealer hand. Could update to list in the future.
+List<Player> players = new List<Player>();              //Dealer is at index 0, players are at index 1 and up.
+List<Cards>[] hands = Array.Empty<List<Cards>>();       //Merge into the player class?
 
 double[,] bank = new double[0, 0];                      //Each row(player) has 2 columns, Index 0 holds bank balance, 1 Holds the current bet amount.
 
@@ -21,7 +19,7 @@ TitleScreen();                                          //Display Title Screen
 InitializePlayers();                                    //Init Players
 Betting();                                              //Take Bets for each Player in the game
 DealCards();                                            //Deal Cards for each player. Two face up each. Deal Cards for dealer, 1 face up, 1 face down.
-for (int i = 0; i < players.Count; i++)                 //Iterate though player loop, moving on to the next once they have either stood, or gone bust.
+for (int i = 1; i < players.Count; i++)                 //Iterate though player loop, moving on to the next once they have either stood, or gone bust.
 {
     do
     {
@@ -42,7 +40,7 @@ for (int i = 0; i < players.Count; i++)                 //Iterate though player 
             }
             else Console.WriteLine("Invalid Input. Would you like to Hit or Stand?");
         }
-    } while (players[i].inGame);                                //Repeat loop while player is not Bust, and hasn't Stood
+    } while (players[i].inGame);                        //Repeat loop while player is not Bust, and hasn't Stood
 }
 DealerPlay();                                           //Once Every player has stood or busted, Dealer takes their turn
 GameEnd();                                              //Prompt replay, new game, or quit.
@@ -50,42 +48,27 @@ GameEnd();                                              //Prompt replay, new gam
 
 ///Methods///
 
-void GamePause() => Thread.Sleep(500);                 //Allows for globally adjusting the pause duration.
+void GamePause() => Thread.Sleep(500);                  //Allows for globally adjusting the pause duration.
 
-int TotalValue(string dealerOrPlayer, int index = 0)    //Take input for which player
+int TotalValue(int index)    
 {
     int totalValue = 0;
-    switch (dealerOrPlayer)
+    foreach (var card in hands[index])
     {
-        case "player":
-            foreach (var card in playerHand[index])
-            {
-                totalValue += card.value;
-            }
-            return totalValue;
-
-        case "dealer":
-            foreach (var card in dealerHand)
-            {
-              totalValue += card.value;  
-            }
-            return totalValue;
-
-        default:
-            Console.WriteLine("You have a logic error, check your paramenters when calling this method.");
-            return 0;
+        totalValue += card.value;
     }
+    return totalValue;
 }
 
 void ShowHand(int currentPlayer) 
 {
     Console.WriteLine($"Your hand is currently: ");
-    for (int i = 0; i < playerHand[currentPlayer].Count(); i++)
+    for (int i = 0; i < hands[currentPlayer].Count(); i++)
     {
-        Console.Write($"{playerHand[currentPlayer][i].CardName}({playerHand[currentPlayer][i].value}), ");
+        Console.Write($"{hands[currentPlayer][i].CardName}({hands[currentPlayer][i].value}), ");
     }
     Console.WriteLine("");
-    Console.WriteLine($"For a total of {TotalValue("player", currentPlayer)}");
+    Console.WriteLine($"For a total of {TotalValue(currentPlayer)}");
 }
 
 void BuildDeck()
@@ -147,6 +130,14 @@ void InitializePlayers()
 {
     //Console.Clear();
     bool gameStart = false;
+
+    Player dealer = new Player();
+    dealer.playerName = "DEALER";
+    dealer.inGame = true;
+    dealer.isBust = false;
+    dealer.hasAce = false;
+    players.Add(dealer);
+
     Console.WriteLine("Please enter your Player Name(s) then hit return. Type Start to begin");
     do
     {
@@ -181,8 +172,6 @@ void InitializePlayers()
     } while (!gameStart);
 }
 
-
-
 void Betting()
 {
     bool validEnty = false;
@@ -191,17 +180,17 @@ void Betting()
     {
         double[,] bankInit = new double[players.Count, 2];
         bank = bankInit;
-        for (int i = 0; i < players.Count; i++)
+        for (int i = 1; i < players.Count; i++)
         {
             bank[i, 0] = 10.00;                                             //Starting Bank balance   
             bank[i, 1] = 0.00;                                              //Current Bet Amount
         }
-        if (players.Count <= 1) Console.WriteLine("You have been given $10.00 as a new player bonus!");
+        if (players.Count <= 2) Console.WriteLine("You have been given $10.00 as a new player bonus!");             //If we only have 2 entries in players, we have one player[1] and the dealer[0]
         else Console.WriteLine("You have each been given a new player bonus of $10.00!");
         GamePause();
     }
 
-    for (int i = 0; i < players.Count; i++)
+    for (int i = 1; i < players.Count; i++)
     {
         validEnty = false;
         //Console.Clear();
@@ -247,6 +236,9 @@ Cards DrawCard(Cards[,] cardArray)
         if (!cardDeck[suit, card].inPlay)                                    //If the selected array address is valid, replace it with 0, decrement total cards.
         {
             cardDeck[suit, card].inPlay = true;
+            if(cardDeck[suit, card].name == "Ace")
+            {
+            }
             totalCardsRemaining--;
             validCard = true;
         }
@@ -262,21 +254,23 @@ Cards DrawCard(Cards[,] cardArray)
 
 void DealCards()
 {
-    //Deal Cards for each player. Two face up each. Deal Cards for dealer, 1 face up, 1 face down.
-    dealerHand = new Cards[2];
-    dealerHand[0] = DrawCard(cardDeck);
-    dealerHand[1] = DrawCard(cardDeck);
-    Console.WriteLine($"Dealer draws a {dealerHand[1].value} and a face down card!");
+    hands = new List<Cards>[players.Count];
+
+    hands[0] = new List<Cards>();
+    hands[0].Add(DrawCard(cardDeck));
+    hands[0].Add(DrawCard(cardDeck));
+    Console.WriteLine($"Dealer draws a {hands[0][1].value} and a face down card!");
     Console.WriteLine();
     GamePause();
 
-    playerHand = new List<Cards>[players.Count];
-    for (int i = 0; i < playerHand.Length; i++)
+    //Now Assign Players
+    for (int i = 1; i < hands.Length; i++)
     {
-        playerHand[i] = new List<Cards>();
-        playerHand[i].Add(DrawCard(cardDeck));
-        playerHand[i].Add(DrawCard(cardDeck));
-        Console.WriteLine($"{players[i].playerName} drew a {playerHand[i][0].value} and {playerHand[i][1].value} for a total of {TotalValue("player", i)}!");
+        hands[i] = new List<Cards>();
+        hands[i].Add(DrawCard(cardDeck));
+        hands[i].Add(DrawCard(cardDeck));
+        //CheckforAces
+        Console.WriteLine($"{players[i].playerName} drew a {hands[i][0].value} and {hands[i][1].value} for a total of {TotalValue(i)}!");
         Console.WriteLine();
         GamePause();
     }
@@ -285,12 +279,12 @@ void DealCards()
 void Hit(int currentPlayer)
 {
     Console.WriteLine($"{players[currentPlayer].playerName} has decided to hit!");
-    playerHand[currentPlayer].Add(DrawCard(cardDeck));
+    hands[currentPlayer].Add(DrawCard(cardDeck));
 
     //Handle Bust condition. Remove player from current loop. Remove their bet from bank balance.
-    if (TotalValue("player", currentPlayer) > 21)
+    if (TotalValue(currentPlayer) > 21)
     {
-        Console.WriteLine($"BUST!! {players[currentPlayer].playerName} drew a {playerHand[currentPlayer].Last().value} for a total of {TotalValue("player", currentPlayer)}!");
+        Console.WriteLine($"BUST!! {players[currentPlayer].playerName} drew a {hands[currentPlayer].Last().value} for a total of {TotalValue(currentPlayer)}!");
         players[currentPlayer].inGame = false;
         players[currentPlayer].isBust = true;
         bank[currentPlayer, 0] -= bank[currentPlayer, 1];
@@ -298,7 +292,7 @@ void Hit(int currentPlayer)
     }
     else
     {
-        Console.WriteLine($"{players[currentPlayer].playerName} drew a {playerHand[currentPlayer].Last().value} for a total of {TotalValue("player", currentPlayer)}!");
+        Console.WriteLine($"{players[currentPlayer].playerName} drew a {hands[currentPlayer].Last().value} for a total of {TotalValue(currentPlayer)}!");
         GamePause();
     }
 }
@@ -306,7 +300,7 @@ void Hit(int currentPlayer)
 void Stand(int currentPlayer)
 {
     //Console.Clear();
-    Console.WriteLine($"{players[currentPlayer].playerName} has decided to stand! The total of their hand is {TotalValue("player", currentPlayer)}.");
+    Console.WriteLine($"{players[currentPlayer].playerName} has decided to stand! The total of their hand is {TotalValue(currentPlayer)}.");
     players[currentPlayer].inGame = false;
     GamePause();
 }
@@ -315,23 +309,22 @@ void DealerPlay()
 {
     bool dealerPlaying = true;
     //Reveal the face down card.
-    Console.WriteLine($"Dealer reveals their facedown card. Their cards are {dealerHand[0].CardName}({dealerHand[0].value}) and {dealerHand[1].CardName}({dealerHand[1].value}).");
+    Console.WriteLine($"Dealer reveals their facedown card. Their cards are {hands[0][0].CardName}({hands[0][0].value}) and {hands[0][1].CardName}({hands[0][1].value}).");
     GamePause();
     do
     {
         //If dealer total is < 17, they hit. If its >= 17 they stand.
-        if (TotalValue("dealer") < 17)
+        if (TotalValue(0) < 17)     //Dealer Index is 0
         {
-            Array.Resize(ref dealerHand, dealerHand.Length + 1);
-            dealerHand[dealerHand.Length - 1] = DrawCard(cardDeck);
-            Console.WriteLine($"Dealer draws a {dealerHand[dealerHand.Length-1].CardName}({dealerHand[dealerHand.Length-1].value}) for a total of {TotalValue("dealer")}.");
+            hands[0].Add(DrawCard(cardDeck));
+            Console.WriteLine($"Dealer draws a {hands[0][hands[0].Count() - 1].CardName}({hands[0][hands[0].Count() - 1].value}) for a total of {TotalValue(0)}.");
 
             //If dealer busts, every player who STOOD and didn't bust win.
-            if (TotalValue("dealer") > 21)
+            if (TotalValue(0) > 21)
             {
                 Console.WriteLine("Dealer has gone Bust!");
                 bool playerCashedOut = false;
-                for (int i = 0; i < players.Count; i++)
+                for (int i = 1; i < players.Count; i++)
                 {
                     if (!players[i].isBust)
                     {
@@ -347,7 +340,7 @@ void DealerPlay()
         else
         {
             //If dealer reaches a valid hand, total and compare to each valid players hand
-            Console.WriteLine($"Dealer stands with a total of {TotalValue("dealer")}");
+            Console.WriteLine($"Dealer stands with a total of {TotalValue(0)}");
             dealerPlaying = false;
             Cashout();
         }
@@ -357,11 +350,11 @@ void DealerPlay()
 void Cashout()
 {
     //Console.Clear();
-    int dealerTotal = TotalValue("dealer");
+    int dealerTotal = TotalValue(0);
     Console.WriteLine($"Dealer total is {dealerTotal}.");
-    for (int i = 0; i < players.Count; i++)
+    for (int i = 1; i < players.Count; i++)
     {
-        int playerTotal = TotalValue("player", i);
+        int playerTotal = TotalValue(i);
         //If player hand higher, they win. If equal, they only recieve their original bet amount. If less, they lose.
         if (playerTotal > dealerTotal && !players[i].isBust)
         {
