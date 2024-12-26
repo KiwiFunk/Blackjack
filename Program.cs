@@ -131,11 +131,7 @@ void InitializePlayers()
     //Console.Clear();
     bool gameStart = false;
 
-    Player dealer = new Player();
-    dealer.playerName = "DEALER";
-    dealer.inGame = true;
-    dealer.isBust = false;
-    dealer.hasAce = false;
+    Player dealer = new Player("DEALER");
     players.Add(dealer);
 
     Console.WriteLine("Please enter your Player Name(s) then hit return. Type Start to begin");
@@ -158,11 +154,7 @@ void InitializePlayers()
             }
             else
             {
-                Player player = new Player();
-                player.playerName = $"{returnResult.ToUpper().Trim()}";
-                player.inGame = true;
-                player.isBust = false;
-                player.hasAce = false;
+                Player player = new Player(returnResult.ToUpper().Trim());
                 players.Add(player);
                 //Console.Clear();
                 Console.WriteLine($"{returnResult.ToUpper()} Registered. Enter another name, or type start to begin!");
