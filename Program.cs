@@ -1,22 +1,22 @@
 ﻿using BlackjackGame;
 
 Cards[,] cardDeck = new Cards[4, 13];
-int totalCardsRemaining = 52;
 Random cardSelect = new Random();                       //Init a random function for selecting a card.
-
 string? returnResult;
 
 List<Player> players = new List<Player>();              //Dealer is at index 0, players are at index 1 and up.
 List<Cards>[] hands = Array.Empty<List<Cards>>();       //Merge into the player class?
 
 double[,] bank = new double[0, 0];                      //Each row(player) has 2 columns, Index 0 holds bank balance, 1 Holds the current bet amount.
+int gameStatus = 0;                                     //Altered by GameEnd() to prompt replay, new game, or quit. 
 
 
 ///Game Start///
-
+do{
 BuildDeck();
 TitleScreen();                                          //Display Title Screen
 InitializePlayers();                                    //Init Players
+do{
 Betting();                                              //Take Bets for each Player in the game
 DealCards();                                            //Deal Cards for each player. Two face up each. Deal Cards for dealer, 1 face up, 1 face down.
 for (int i = 1; i < players.Count; i++)                 //Iterate though player loop, moving on to the next once they have either stood, or gone bust.
@@ -44,6 +44,8 @@ for (int i = 1; i < players.Count; i++)                 //Iterate though player 
 }
 DealerPlay();                                           //Once Every player has stood or busted, Dealer takes their turn
 GameEnd();                                              //Prompt replay, new game, or quit.
+}while (gameStatus == 0);
+}while (gameStatus == 1);
 
 
 ///Methods///
@@ -259,7 +261,6 @@ Cards DrawCard(Cards[,] cardArray, int player = 0)                          //Ta
             {
                 players[player].hasAce = true;
             }
-            totalCardsRemaining--;
             validCard = true;
         }
         else                                                                //If selected address .inPlay == true, select a new one.
@@ -407,14 +408,23 @@ void GameEnd()
         {
             if (returnResult.Trim() == "1")
             {
-                Console.WriteLine("Feature not implemented yet, check back later! Enter 3 to quit.");
+                gameStatus = 0;
+                gameEnd = true;
+                //Need logic to check bank balance of players before continuing.
+                //if player has isBust flag, and bank balance is 0.00, remove them from the game.
+                //If there are no possible players left, prompt for new game(2) or quit(3).
             }
             else if (returnResult.Trim() == "2")
             {
-                Console.WriteLine("Feature not implemented yet, check back later! Enter 3 to quit.");
+                gameStatus = 1;
+                bank = new double[0, 0];                    //Replace bank array with a new empty instance.
+                players.Clear();                            //Better for memory management to clear the list, rather than create a new instance.  
+                hands = new List<Cards>[0];                 //Replace hands array with a new empty instance.
+                gameEnd = true;
             }
             else if (returnResult.Trim() == "3")
             {
+                gameStatus = 2;
                 gameEnd = true;
             }
             else Console.WriteLine("Invalid Input!");
