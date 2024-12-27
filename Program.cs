@@ -305,7 +305,8 @@ void Hit(int currentPlayer)
         Console.WriteLine($"BUST!! {players[currentPlayer].playerName} drew a {players[currentPlayer].hand.Last().value} for a total of {TotalValue(currentPlayer)}!");
         players[currentPlayer].inGame = false;
         players[currentPlayer].isBust = true;
-        players[currentPlayer].bank[0] -= players[currentPlayer].bank[1];
+        //Wager was already taken from bank during Betting()
+        BankruptCheck(currentPlayer);
         GamePause();
     }
     else
@@ -323,6 +324,14 @@ void Stand(int currentPlayer)
     GamePause();
 }
 
+void BankruptCheck(int currentPlayer)
+{
+    if (players[currentPlayer].bank[0] <= 0)
+    {
+        players[currentPlayer].isBankrupt = true;
+    }
+}
+
 void DealerPlay()
 {
     bool dealerPlaying = true;
@@ -331,15 +340,13 @@ void DealerPlay()
     GamePause();
     do
     {
-        //If dealer total is < 17, they hit. If its >= 17 they stand.
-        if (TotalValue(0) < 17)     //Dealer Index is 0
+        if (TotalValue(0) < 17)                                         //Dealer Index is 0. If dealer total is < 17, they hit. If its >= 17 they stand.
         {
             players[0].hand.Add(DrawCard(cardDeck));
             CheckforAces();
             Console.WriteLine($"Dealer draws a {players[0].hand[players[0].hand.Count() - 1].CardName}({players[0].hand[players[0].hand.Count() - 1].value}) for a total of {TotalValue(0)}.");
 
-            //If dealer busts, every player who STOOD and didn't bust win.
-            if (TotalValue(0) > 21)
+            if (TotalValue(0) > 21)                                     //If dealer busts, every player who STOOD and didn't bust win.
             {
                 Console.WriteLine("Dealer has gone Bust!");
                 bool playerCashedOut = false;
@@ -381,12 +388,16 @@ void Cashout()
             Console.WriteLine($"Congrats {players[i].playerName}, you win! Your bank balance is now ${players[i].bank[0]}!");
         }
 
-        else if (playerTotal == dealerTotal && !players[i].isBust) Console.WriteLine($"Better than nothing {players[i].playerName}, you tie!");
+        else if (playerTotal == dealerTotal && !players[i].isBust)
+        {
+            Console.WriteLine($"Better than nothing {players[i].playerName}, you tie!");
+            players[i].bank[0] += players[i].bank[1];
+        }
 
-        else
+        else if(!players[i].isBust)
         {
             Console.WriteLine($"Sorry {players[i].playerName}, you lose...");
-            players[i].bank[0] -= players[i].bank[1];
+            //Wager was already taken from bank during Betting()
         }
     }
     GamePause();
@@ -408,15 +419,34 @@ void GameEnd()
                 gameEnd = true;
                 currentRound++;
                 BuildDeck();
-                //Method to empty the player's hand list
-                //Need logic to check bank balance of players before continuing.
-                //if player class has isBust flag, and bank balance is 0.00, remove them from the game.
-                //If there are no possible players left, prompt for new game(2) or quit(3).
+                int bankruptPlayers = 0;
+                for (int i = players.Count() - 1; i >= 0; i--)                      //Iterate through players list in reverse to handle removal correctly.  
+                {
+                    players[i].ResetPlayerState();                                  //Reset player state for new round.
+                    if (players[i].isBankrupt)                                      //If player is bankrupt, remove them from the game.
+                    {
+                        Console.WriteLine($"{players[i].playerName} is bankrupt and has been removed from the game.");
+                        players.RemoveAt(i);
+                        bankruptPlayers++;
+                    }
+                }
+                if (bankruptPlayers >= players.Count() - 1)                                     //Dealer will never be bankrupt, so -1.
+                {
+                    gameStatus = 2;
+                    Console.WriteLine("Sorry, there are no players left. Game Over!");          //Update to allow for new game(2) or quit(3) prompt.
+                }
+                else
+                {
+                    Console.WriteLine("New Round Starting!");
+                    GamePause();
+                    //Console.Clear();
+                    Console.WriteLine($"Round {currentRound}. Please place your bets!");
+                } 
             }
             else if (returnResult.Trim() == "2")
             {
                 gameStatus = 1;
-                players.Clear();                            //Better for memory management to clear the list, rather than create a new instance.  
+                players.Clear();                                                    //Better for memory management to clear the list, rather than create a new instance.  
                 gameEnd = true;
             }
             else if (returnResult.Trim() == "3")

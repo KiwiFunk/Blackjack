@@ -10,11 +10,12 @@ This allows for multiple players and features a basic betting system.
     <li>Place wagers!</li>
     <li>Features a proper deck of cards, not just randomly generated values from 1-10</li>
     <li>Has logic for Ace being played as a 1, or an 11.</li>
-<ul>
+    <li>Continue on to the next round, Start again with new players, or quit!</li>
+</ul>
 
 
-# To-Do
+# Future features
 <ul>
-    <li>Add loops to allow for starting a new round with current players and bank balance or a new game state</li>
     <li>Add Split, Double Down, Insurance and Surrender options in addition to Hit and Stand</li>
+    <li>Allow player to leave and join within a grace period between rounds.</li>
 </ul>
