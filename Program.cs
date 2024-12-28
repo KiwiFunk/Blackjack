@@ -430,7 +430,7 @@ void GameEnd()
                         bankruptPlayers++;
                     }
                 }
-                if (bankruptPlayers >= players.Count() - 1)                                     //Dealer will never be bankrupt, so -1.
+                if (bankruptPlayers >= players.Count())                                     //Dealer will never be bankrupt, so -1.
                 {
                     gameStatus = 2;
                     Console.WriteLine("Sorry, there are no players left. Game Over!");          //Update to allow for new game(2) or quit(3) prompt.
