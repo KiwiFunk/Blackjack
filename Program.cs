@@ -288,7 +288,7 @@ void DealCards()
         players[i].hand.Add(DrawCard(cardDeck, i));
         players[i].hand.Add(DrawCard(cardDeck, i));
         CheckforAces(i);
-        Console.WriteLine($"{players[i].playerName} drew a {players[i].hand[0].value} and {players[i].hand[1].value} for a total of {TotalValue(i)}!");
+        Console.WriteLine($"{players[i].playerName} drew a {players[i].hand[0].CardName}({players[i].hand[0].value}) and {players[i].hand[1].CardName}({players[i].hand[1].value}) for a total of {TotalValue(i)}!");
         Console.WriteLine();
         GamePause();
     }
@@ -302,7 +302,7 @@ void Hit(int currentPlayer)
     //Handle Bust condition. Remove player from current loop. Remove their bet from bank balance.
     if (TotalValue(currentPlayer) > 21)
     {
-        Console.WriteLine($"BUST!! {players[currentPlayer].playerName} drew a {players[currentPlayer].hand.Last().value} for a total of {TotalValue(currentPlayer)}!");
+        Console.WriteLine($"BUST!! {players[currentPlayer].playerName} drew a {players[currentPlayer].hand.Last().CardName}({players[currentPlayer].hand.Last().value}) for a total of {TotalValue(currentPlayer)}!");
         players[currentPlayer].inGame = false;
         players[currentPlayer].isBust = true;
         //Wager was already taken from bank during Betting()
@@ -311,7 +311,7 @@ void Hit(int currentPlayer)
     }
     else
     {
-        Console.WriteLine($"{players[currentPlayer].playerName} drew a {players[currentPlayer].hand.Last().value} for a total of {TotalValue(currentPlayer)}!");
+        Console.WriteLine($"{players[currentPlayer].playerName} drew a {players[currentPlayer].hand.Last().CardName}({players[currentPlayer].hand.Last().value}) for a total of {TotalValue(currentPlayer)}!");
         GamePause();
     }
 }
